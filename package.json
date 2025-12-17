@@ -1,23 +1,23 @@
 {
   "name": "vscode-solution-explorer",
-  "displayName": "vscode-solution-explorer",
+  "displayName": "Solution Explorer (C++ Enhanced)",
   "description": "Visual Studio .sln file explorer for Visual Studio Code",
-  "version": "0.9.2",
+  "version": "0.9.4",
   "license": "MIT",
-  "publisher": "fernandoescolar",
+  "publisher": "byulee",
   "icon": "images/icon.png",
   "author": {
-    "email": "f.escolar@hotmail.com",
-    "name": "Fernando Escolar",
-    "url": "http://fernandoescolar.github.io"
+    "email": "byungsil@gmail.com",
+    "name": "DoHa Lee",
+    "url": "https://github.com/byungsil/vscode-solution-explorer"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/fernandoescolar/vscode-solution-explorer"
+    "url": "https://github.com/byungsil/vscode-solution-explorer"
   },
   "bugs": {
-    "url": "https://github.com/fernandoescolar/vscode-solution-explorer/issues",
-    "email": "f.escolar@hotmail.com"
+    "url": "https://github.com/byungsil/vscode-solution-explorer/issues",
+    "email": "byungsil@gmail.com"
   },
   "engines": {
     "vscode": "^1.99.1"
@@ -61,11 +61,11 @@
     "viewsWelcome": [
       {
         "view": "slnexpl",
-        "contents": "No visual studio solution found [learn more](https://github.com/fernandoescolar/vscode-solution-explorer#open-solutions).\n[Open solution](command:solutionExplorer.openSolution)\n[Create New Solution](command:solutionExplorer.createNewSolution)"
+        "contents": "No visual studio solution found [learn more](https://github.com/byungsil/vscode-solution-explorer#open-solutions).\n[Open solution](command:solutionExplorer.openSolution)\n[Create New Solution](command:solutionExplorer.createNewSolution)"
       },
       {
         "view": "slnbrw",
-        "contents": "No visual studio solution found [learn more](https://github.com/fernandoescolar/vscode-solution-explorer#open-solutions).\n[Open solution](command:solutionExplorer.openSolution)\n[Create New Solution](command:solutionExplorer.createNewSolution)"
+        "contents": "No visual studio solution found [learn more](https://github.com/byungsil/vscode-solution-explorer#open-solutions).\n[Open solution](command:solutionExplorer.openSolution)\n[Create New Solution](command:solutionExplorer.createNewSolution)"
       }
     ],
     "commands": [
@@ -345,6 +345,11 @@
       {
         "command": "solutionExplorer.invalidateNugetCache",
         "title": "Invalidate Nuget Cache",
+        "category": "Solution Explorer"
+      },
+      {
+        "command": "solutionExplorer.configureIntelliSense",
+        "title": "Configure C++ IntelliSense",
         "category": "Solution Explorer"
       }
     ],
@@ -657,6 +662,11 @@
         {
           "command": "solutionExplorer.test",
           "when": "view in solutionexplorer.viewTypes && viewItem in solutionExplorer.cmdAllowedContexts.test",
+          "group": "99_dotnet_commands"
+        },
+        {
+          "command": "solutionExplorer.configureIntelliSense",
+          "when": "view in solutionexplorer.viewTypes && viewItem in solutionExplorer.cmdAllowedContexts.configureIntelliSense",
           "group": "99_dotnet_commands"
         }
       ]
@@ -990,6 +1000,7 @@
     "@types/webpack-env": "^1.17.0",
     "@typescript-eslint/eslint-plugin": "^5.31.0",
     "@typescript-eslint/parser": "^5.31.0",
+    "@vscode/vsce": "^2.15.0",
     "eslint": "^8.20.0",
     "mocha": "^10.0.0",
     "process": "0.11.10",

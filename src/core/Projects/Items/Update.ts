@@ -8,7 +8,7 @@ export class Update extends IncludeBase {
         super(type, value, link, linkBase);
     }
 
-    public getEntries(projectBasePath: string, entries: ProjectItemEntry[]): Promise<ProjectItemEntry[]> {
+    public getEntries(projectBasePath: string, entries: ProjectItemEntry[], filtersManager?: any): Promise<ProjectItemEntry[]> {
         for (let index = 0; index < entries.length; index++) {
             const entry = entries[index];
             if (glob.globTest(this.value.split(";").map(s => path.join(projectBasePath, s)), entry.fullPath)) {

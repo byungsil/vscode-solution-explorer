@@ -25,3 +25,11 @@ export function relative(from: string, to: string): string {
 export function resolve(...paths: string[]): string {
     return path.resolve(...paths);
 }
+
+export function isAbsolute(filepath: string): boolean {
+    return path.isAbsolute(filepath);
+}
+
+export function normalize(filepath: string): string {
+    return path.normalize(filepath);
+}

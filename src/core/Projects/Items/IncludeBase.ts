@@ -30,7 +30,14 @@ export abstract class IncludeBase extends ProjectItem {
     }
 
     protected getRecursiveDir(filepath: string, searchPath: string): string {
-        let result = path.dirname(filepath).substring(searchPath.length + 1);
+        const dirPath = path.dirname(filepath);
+
+        // Handle case where filepath is outside searchPath (e.g., absolute paths in C++ projects)
+        if (!dirPath.toLowerCase().startsWith(searchPath.toLowerCase())) {
+            return "";
+        }
+
+        let result = dirPath.substring(searchPath.length + 1);
         if (result) {
             if (result.startsWith(path.sep)) {
                 result = result.substring(1);

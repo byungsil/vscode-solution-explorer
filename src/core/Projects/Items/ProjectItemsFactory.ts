@@ -10,8 +10,19 @@ import { Remove } from "./Remove";
 import { Update } from "./Update";
 import { PackageVersion } from "./PackageVersion";
 
-const ignoreItems = ["AssemblyMetadata", "BaseApplicationManifest", "CodeAnalysisImport", "COMReference", "COMFileReference", "Import", "InternalsVisibleTo", "NativeReference", "TrimmerRootAssembly", "Using", "Protobuf"];
-const knownTypes = ["Reference", "PackageReference", "ProjectReference", "Folder", "Content", "Compile", "None", "EmbeddedResource", "PackageVersion"];
+const ignoreItems = [
+    "AssemblyMetadata", "BaseApplicationManifest", "CodeAnalysisImport", "COMReference",
+    "COMFileReference", "Import", "InternalsVisibleTo", "NativeReference",
+    "TrimmerRootAssembly", "Using", "Protobuf",
+    // C++ vcxproj.filters items to ignore (these are for Visual Studio UI only)
+    "Filter", "UniqueIdentifier"
+];
+const knownTypes = [
+    "Reference", "PackageReference", "ProjectReference", "Folder", "Content",
+    "Compile", "None", "EmbeddedResource", "PackageVersion",
+    // C++ project item types
+    "ClCompile", "ClInclude", "Natvis", "ResourceCompile"
+];
 
 export function createProjectElement(xml: XmlElement, properties: Record<string, string>): ProjectItem | undefined {
     if (ignoreItems.indexOf(xml.name) >= 0) {

@@ -7,7 +7,7 @@ export class Folder extends ProjectItem {
         super("Folder");
     }
 
-    public getEntries(projectBasePath: string, entries: ProjectItemEntry[]): Promise<ProjectItemEntry[]> {
+    public getEntries(projectBasePath: string, entries: ProjectItemEntry[], filtersManager?: any): Promise<ProjectItemEntry[]> {
         const folderpath = path.resolve(projectBasePath, this.folderpath);
         entries.push(...this.createFoldersIfNotExists(entries, this.folderpath, path.dirname(this.folderpath), false));
 

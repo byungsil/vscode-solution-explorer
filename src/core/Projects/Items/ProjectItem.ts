@@ -4,7 +4,7 @@ export abstract class ProjectItem {
     constructor(public readonly type: string) {
     }
 
-    public getEntries(projectBasePath: string, entries: ProjectItemEntry[]): Promise<ProjectItemEntry[]> {
+    public getEntries(projectBasePath: string, entries: ProjectItemEntry[], filtersManager?: any): Promise<ProjectItemEntry[]> {
         return Promise.resolve(entries);
     }
 

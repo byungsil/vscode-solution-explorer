@@ -42,3 +42,4 @@ export * from "./TestCommand";
 export * from "./UpdatePackagesVersionCommand";
 export * from "./WatchRunCommand";
 export * from "./UpdatePackageVersionCommand";
+export * from "./ConfigureIntelliSenseCommand";

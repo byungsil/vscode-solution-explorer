@@ -128,8 +128,10 @@ export class MsBuildProject extends ProjectWithManagers {
         const projectItems = await this.xml.getProjectItems();
         const entries: ProjectItemEntry[] = [];
         const projectBasePath = path.dirname(this.fullPath);
+        const filtersManager = await this.xml.getFiltersManager();
+
         for(const item of projectItems) {
-            await item.getEntries(projectBasePath, entries);
+            await item.getEntries(projectBasePath, entries, filtersManager);
         }
 
         return entries;

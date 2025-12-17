@@ -49,3 +49,4 @@ export * from "./DotNetRun";
 export * from "./SelectActiveDocumentInTree";
 export * from "./DotNetTest";
 export * from "./DotNetWatch";
+export * from "./ConfigureIntelliSense";

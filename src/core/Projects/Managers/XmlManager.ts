@@ -8,6 +8,7 @@ import { ProjectFileStat } from "../ProjectFileStat";
 import { Manager } from "./Manager";
 import { Direction, RelativeFilePosition } from "../RelativeFilePosition";
 import { NugetDependencies } from "@extensions/nuget-dependencies";
+import { VcxprojFiltersManager } from "./VcxprojFiltersManager";
 
 interface NamedHierarchy<T> {
     groupName: string;
@@ -24,9 +25,16 @@ export class XmlManager implements Manager {
     private currentItemGroup: xml.XmlElement | undefined = undefined;
     private _sdk: string | undefined;
     private _toolsVersion: string | undefined;
+    private filtersManager: VcxprojFiltersManager | undefined;
 
     constructor(private readonly fullPath: string, private readonly includePrefix?: string) {
         this.projectFolderPath = path.dirname(fullPath);
+
+        // Initialize filters manager for C++ projects
+        if (fullPath.toLowerCase().endsWith('.vcxproj')) {
+            const filtersPath = fullPath + '.filters';
+            this.filtersManager = new VcxprojFiltersManager(filtersPath);
+        }
     }
 
     public get isCps(): boolean {
@@ -43,6 +51,10 @@ export class XmlManager implements Manager {
 
     public get isFSharp(): boolean {
         return this.fullPath.toLocaleLowerCase().endsWith(".fsproj");
+    }
+
+    public async getFiltersManager(): Promise<VcxprojFiltersManager | undefined> {
+        return this.filtersManager;
     }
 
     public async createFile(folderpath: string, filename: string, content?: string, relativePosition?: RelativeFilePosition): Promise<string> {
@@ -397,6 +409,12 @@ export class XmlManager implements Manager {
     public async refresh(): Promise<void> {
         const content = await fs.readFile(this.fullPath);
         this.document = await xml.parseToJson(content);
+
+        // Load filters for C++ projects
+        if (this.filtersManager) {
+            await this.filtersManager.load();
+        }
+
         this.projectItems = this.parseDocument();
     }
 
@@ -751,13 +769,15 @@ export class XmlManager implements Manager {
         if (!project) { return []; }
 
         const result: ProjectItem[] = [];
-        if ((this._sdk = project.attributes && project.attributes.Sdk) && !this.isFSharp) {
+        this._sdk = project.attributes && project.attributes.Sdk;
+        this._toolsVersion = project.attributes && project.attributes.ToolsVersion;
+
+        // Only add glob pattern for SDK-style projects (not C++ vcxproj)
+        if (this._sdk && !this.isFSharp) {
             const exclude = [...config.getNetCoreIgnore(), this.fullPath].join(";");
             const allFolders = new Include("Compile", "**/*", undefined, undefined, exclude);
             result.push(allFolders);
         }
-
-        this._toolsVersion = project.attributes && project.attributes.ToolsVersion;
 
         const properties: Record<string, string> = {};
         if (this.includePrefix?.startsWith("$(") && this.includePrefix?.endsWith(")")) {
@@ -852,7 +872,16 @@ export class XmlManager implements Manager {
             "CustomBuild",
             "EmbeddedResource",
             "None",
-            "Folder"
+            "Folder",
+            // Additional C++ project item types
+            "Natvis",
+            "ResourceCompile",
+            "MASM",
+            "MASM64",
+            "Midl",
+            "Image",
+            "Manifest",
+            "Text"
         ];
 
         const itemTypes = config.getItemTypes();

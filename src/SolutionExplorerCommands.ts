@@ -51,7 +51,7 @@ export class SolutionExplorerCommands {
           new cmds.CreateDirectoryPackagesCommand(),
           both(ContextValues.solution),
         ];
-        
+
         this.commands['createFile'] = [new cmds.CreateFileCommand(templateEngineCollection),
             [ContextValues.projectFile, ...anyLang(ContextValues.projectFolder), ...both(ContextValues.project)]];
 
@@ -174,6 +174,9 @@ export class SolutionExplorerCommands {
 
         this.commands['deleteMultiple'] = [new cmds.DeleteUnifiedCommand(),
             [ContextValues.multipleSelection]];
+
+        this.commands['configureIntelliSense'] = [new cmds.ConfigureIntelliSenseCommand(),
+            [ContextValues.project, 'project-standard', 'project-cps']];
     }
 
     public register() {

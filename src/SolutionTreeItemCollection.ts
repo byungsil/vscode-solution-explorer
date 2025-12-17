@@ -1,6 +1,8 @@
 import { SolutionExplorerProvider } from "@SolutionExplorerProvider";
 import { SolutionFactory } from "@core/Solutions";
 import { TreeItem, TreeItemFactory } from "@tree";
+import { CppPropertiesManager } from "@core/Projects/Managers/CppPropertiesManager";
+import * as vscode from "vscode";
 
 
 export class SolutionTreeItemCollection {
@@ -35,6 +37,36 @@ export class SolutionTreeItemCollection {
 		}
 
 		this.children.push(item);
+
+		// Auto-configure IntelliSense for C++ projects
+		this.configureIntelliSenseForCppProjects(solution);
+	}
+
+	private async configureIntelliSenseForCppProjects(solution: any): Promise<void> {
+		try {
+			// Find all C++ projects (.vcxproj files)
+			const allProjects = solution.getAllProjects ? solution.getAllProjects() : [];
+			const cppProjects = allProjects.filter((project: any) =>
+				project.fullPath && project.fullPath.toLowerCase().endsWith('.vcxproj')
+			);
+
+			if (cppProjects.length === 0) {
+				return; // No C++ projects found
+			}
+
+			// Configure IntelliSense for each C++ project silently
+			for (const project of cppProjects) {
+				try {
+					await CppPropertiesManager.configureIntelliSense(project.fullPath, true); // silent = true
+				} catch (error) {
+					// Silently ignore errors for individual projects
+					console.log(`Failed to configure IntelliSense for ${project.fullPath}:`, error);
+				}
+			}
+		} catch (error) {
+			// Silently ignore errors
+			console.log('Error configuring C++ IntelliSense:', error);
+		}
 	}
 
 	public getLoadedChildTreeItemById(id: string): TreeItem | undefined {
