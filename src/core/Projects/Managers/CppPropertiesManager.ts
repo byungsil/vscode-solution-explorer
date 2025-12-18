@@ -114,24 +114,25 @@ export class CppPropertiesManager {
 
                                 paths.forEach((p: string) => {
                                     let cleanPath = p.trim();
-                                    if (cleanPath && !cleanPath.includes('$(')) { // Skip MSBuild variables
-                                        // Filter out system paths and only keep project-relative paths
-                                        if (!cleanPath.toLowerCase().includes('windows kits') &&
-                                            !cleanPath.toLowerCase().includes('microsoft visual studio') &&
-                                            cleanPath !== '%(AdditionalIncludeDirectories)') {
+                                    // Skip special MSBuild macros
+                                    if (cleanPath && cleanPath !== '%(AdditionalIncludeDirectories)') {
+                                        // Normalize path separators
+                                        cleanPath = cleanPath.replace(/\\/g, '/');
 
-                                            // Normalize path separators
-                                            cleanPath = cleanPath.replace(/\\/g, '/');
-
-                                            // Convert to absolute path based on project directory
+                                        // Convert to absolute path based on project directory
+                                        // Only if it doesn't contain MSBuild variables
+                                        if (!cleanPath.includes('$(')) {
                                             let absolutePath: string;
                                             if (path.isAbsolute(cleanPath)) {
                                                 absolutePath = cleanPath;
                                             } else {
                                                 absolutePath = path.join(projectDir, cleanPath).replace(/\\/g, '/');
                                             }
-
                                             includePaths.add(absolutePath);
+                                        } else {
+                                            // Keep paths with MSBuild variables as-is for now
+                                            // These will be resolved later
+                                            includePaths.add(cleanPath);
                                         }
                                     }
                                 });
@@ -178,6 +179,17 @@ export class CppPropertiesManager {
             existingConfig.includePath.forEach(p => allIncludePaths.add(p));
         }
         includePaths.forEach(p => allIncludePaths.add(p));
+
+        // Add Windows SDK and Visual Studio include paths only if environment variables are set
+        // This prevents adding wildcard paths that could slow down the system
+        const windowsSdkPaths = this.getWindowsSDKIncludePaths();
+        const vsPaths = this.getVisualStudioIncludePaths();
+        if (windowsSdkPaths.length > 0) {
+            windowsSdkPaths.forEach(p => allIncludePaths.add(p));
+        }
+        if (vsPaths.length > 0) {
+            vsPaths.forEach(p => allIncludePaths.add(p));
+        }
 
         // Merge defines from existing config
         const allDefines = new Set<string>();
@@ -269,6 +281,54 @@ export class CppPropertiesManager {
             configurations: [],
             version: 4
         };
+    }
+
+    /**
+     * Get Windows SDK include paths from environment or common locations
+     */
+    private static getWindowsSDKIncludePaths(): string[] {
+        const paths: string[] = [];
+
+        // Try to get from environment variables
+        const windowsSdkDir = process.env['WindowsSdkDir'];
+        const windowsSdkVersion = process.env['WindowsSDKVersion'];
+
+        if (windowsSdkDir && windowsSdkVersion) {
+            // Remove trailing backslash from version if present
+            const version = windowsSdkVersion.replace(/\\+$/, '');
+            const sdkIncludeBase = path.join(windowsSdkDir, 'Include', version).replace(/\\/g, '/');
+
+            // Add standard SDK include directories
+            paths.push(
+                `${sdkIncludeBase}/ucrt`,
+                `${sdkIncludeBase}/um`,
+                `${sdkIncludeBase}/shared`,
+                `${sdkIncludeBase}/winrt`,
+                `${sdkIncludeBase}/cppwinrt`
+            );
+        }
+        // If environment variables are not set, don't add any paths
+        // This prevents wildcards that could slow down IntelliSense
+
+        return paths;
+    }
+
+    /**
+     * Get Visual Studio include paths from environment or common locations
+     */
+    private static getVisualStudioIncludePaths(): string[] {
+        const paths: string[] = [];
+
+        // Try to get from environment variables
+        const vcInstallDir = process.env['VCINSTALLDIR'];
+        if (vcInstallDir) {
+            const vcInclude = path.join(vcInstallDir, 'include').replace(/\\/g, '/');
+            paths.push(vcInclude);
+        }
+        // If environment variable is not set, don't add any paths
+        // This prevents wildcards that could slow down IntelliSense
+
+        return paths;
     }
 
     private static findProjectElement(document: XmlElement): XmlElement | undefined {
